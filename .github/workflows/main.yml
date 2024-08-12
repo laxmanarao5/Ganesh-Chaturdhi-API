@@ -17,7 +17,7 @@ jobs:
           node-version: '18'
       - name: Install dependencies
         run: npm install
-      - name: Install dependencies
+      - name: Check current directory
         run: pwd
 
       - name: Configure AWS
@@ -27,5 +27,5 @@ jobs:
           aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
           aws-region: ${{secrets.REGION_NAME}}
 
-      - name: Deploy to S3 bucket
+      - name: Deploy to AWS lambda
         run: sls deploy
