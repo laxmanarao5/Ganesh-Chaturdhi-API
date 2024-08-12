@@ -20,9 +20,19 @@ jobs:
         run: npm install
       - name: Check current directory
         run: pwd
+
+      - name: Update apt packages
+        run: apt update
+      - name: Install python
+        run: Install python3.12
+      - name: Install PIP
+        run: python -m ensurepip –upgrade
+        
       - name: Check current directory
         run: npm install -g serverless
-
+      - name: Install python packages
+        run: pip install -r requirements.txt
+        
       - name: Configure AWS
         uses: aws-actions/configure-aws-credentials@v4
         with:
