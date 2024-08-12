@@ -2,7 +2,7 @@ name: FE dev deployment
 
 on:
   push:
-    branches: ['fe-dev']
+    branches: ['main']
 
 jobs:
   deploy:
