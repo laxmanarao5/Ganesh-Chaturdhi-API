@@ -7,11 +7,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    env:
-      working-directory: 'employees-app'
-    defaults:
-      run:
-        working-directory: ${{ env.working-directory }}
 
     steps:
       - name: Checkout code
