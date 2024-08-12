@@ -28,4 +28,4 @@ jobs:
           aws-region: ${{secrets.REGION_NAME}}
 
       - name: Deploy to AWS lambda
-        run: sls deploy
+        run: serverless deploy
