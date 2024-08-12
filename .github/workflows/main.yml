@@ -19,6 +19,8 @@ jobs:
         run: npm install
       - name: Check current directory
         run: pwd
+      - name: Check current directory
+        run: npm install -g serverless
 
       - name: Configure AWS
         uses: aws-actions/configure-aws-credentials@v4
