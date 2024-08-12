@@ -7,7 +7,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
+    env:
+      SERVERLESS_ACCESS_KEY: 'AKE7Spo0cziBTpOtB3cH8K2GNJGUWbnwNUuMDsEiMQWYR'
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
