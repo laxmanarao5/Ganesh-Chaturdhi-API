@@ -31,3 +31,4 @@ jobs:
 
       - name: Deploy to AWS lambda
         run: serverless deploy
+        
