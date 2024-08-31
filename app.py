@@ -39,8 +39,6 @@ other_table = dynamodb.Table(OTHERS_TABLE)
 
 @app.route("/")
 def hello_from_root():
-    access_token = create_access_token(identity=1)
-    print(access_token)
     return jsonify(message='Hello from root!')
 
 
@@ -188,4 +186,4 @@ def resource_not_found(e):
 
 # Main function
 if __name__ == "__main__":
-    app.run(port=5002,debug=True)
+    app.run(debug=True)
