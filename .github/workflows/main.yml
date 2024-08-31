@@ -18,6 +18,8 @@ jobs:
           node-version: '18'
       - name: Install node dependencies
         run: npm install
+      - name: install serverless
+        run: npm install -g serverless
         
       - name: Install dependencies
         run: |
