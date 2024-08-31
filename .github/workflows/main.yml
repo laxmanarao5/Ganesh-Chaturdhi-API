@@ -18,15 +18,32 @@ jobs:
           node-version: '18'
       - name: Install dependencies
         run: npm install
-      - name: Check current directory
-        run: pwd
+        
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y wget build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libsqlite3-dev libreadline-dev libbz2-dev libffi-dev
 
-      - name: Update apt packages
-        run: apt update
-      - name: Install python
-        run: Install python3.12
-      - name: Install PIP
-        run: python -m ensurepip –upgrade
+          # Download and install Python 3.12
+          wget https://www.python.org/ftp/python/3.12.0/Python-3.12.0.tgz
+          tar -xf Python-3.12.0.tgz
+          cd Python-3.12.0
+          ./configure --enable-optimizations
+          make
+          sudo make altinstall
+
+          # Create symbolic links to make `python` point to Python 3.12
+          sudo update-alternatives --install /usr/bin/python python /usr/local/bin/python3.12 1
+          sudo update-alternatives --install /usr/bin/python3 python3 /usr/local/bin/python3.12 1
+          sudo update-alternatives --install /usr/bin/pip pip /usr/local/bin/pip3.12 1
+
+          # Verify installation
+          python --version
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
         
       - name: Install node packages
         run: npm install
