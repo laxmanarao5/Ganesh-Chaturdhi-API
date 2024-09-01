@@ -77,6 +77,7 @@ def login():
     )
 # Add user
 @app.route('/create_user', methods=['POST'])
+@jwt_required()
 def create_user():
     data = request.get_json()
     data['created_at'] = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
@@ -123,6 +124,7 @@ def change_password():
 
 # Get expenditures
 @app.route('/expenditure',methods=['GET'])
+@jwt_required()
 def get_expenditure():
     year = request.args['year']
     # user_id = request.args.get['user_id']
@@ -135,6 +137,7 @@ def get_expenditure():
     )
 # Add expenditure
 @app.route('/expenditure',methods=['POST'])
+@jwt_required()
 def post_expenditure():
     data = request.get_json()
     result = expenditure_table.put_item(
@@ -148,6 +151,7 @@ def post_expenditure():
 
 # Get donations
 @app.route('/donations',methods=['GET'])
+@jwt_required()
 def get_donations():
     year = request.args['year']
     # user_id = request.args.get['user_id']
@@ -159,6 +163,7 @@ def get_donations():
     )
 # Add donations
 @app.route('/donations',methods=['POST'])
+@jwt_required()
 def post_donations():
     data = request.get_json()
     result = donation_table.put_item(
