@@ -159,7 +159,7 @@ def get_donations():
         FilterExpression=Attr('created_at').begins_with(year)
     )
     return jsonify(
-        result
+        result['Items']
     )
 # Add donations
 @app.route('/donations',methods=['POST'])
