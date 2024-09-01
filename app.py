@@ -108,10 +108,10 @@ def change_password():
         response = user_table.put_item(
         Item=user
         )
-        return jsonify({'message': 'Login Success', 'access_token': access_token})
+        return jsonify({'message': 'Password change Success'})
     return jsonify(
         {
-            "message":"Login Failed"
+            "message":"Invalid request"
         }
     )
 
