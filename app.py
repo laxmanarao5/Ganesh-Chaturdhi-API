@@ -154,7 +154,7 @@ def post_expenditure():
 @jwt_required()
 def delete_expenditure():
     id = request.args['id']
-    response = table.update_item(
+    response = expenditure_table.update_item(
     Key={
         'id': id
     },
@@ -164,8 +164,8 @@ def delete_expenditure():
         ':deleted_by': get_jwt_identity()['email']
     },
     ReturnValues="UPDATED_NEW"
+    )
     return jsonify({'message': 'Expenditure added successfully'})
-)
 
 ############################################################################
 #                                  Donations                               #
