@@ -130,7 +130,11 @@ def get_expenditure():
     year = request.args['year']
     # user_id = request.args.get['user_id']
     result = expenditure_table.scan(
-        FilterExpression=Attr('created_at').begins_with(year)
+       FilterExpression=(
+        Attr('created_at').begins_with(year) & 
+        (Attr('deleted_at').not_exists() | Attr('deleted_at').eq('')) &
+        (Attr('deleted_by').not_exists() | Attr('deleted_by').eq(''))
+    )
     )
     data=result['Items']
     return jsonify(
@@ -176,7 +180,9 @@ def get_donations():
     year = request.args['year']
     # user_id = request.args.get['user_id']
     result = donation_table.scan(
-        FilterExpression=Attr('created_at').begins_with(year)
+        Attr('created_at').begins_with(year) & 
+        (Attr('deleted_at').not_exists() | Attr('deleted_at').eq('')) &
+        (Attr('deleted_by').not_exists() | Attr('deleted_by').eq(''))
     )
     return jsonify(
         result['Items']
@@ -220,7 +226,9 @@ def get_offerings():
     year = request.args['year']
     # user_id = request.args.get['user_id']
     result = offerings_table.scan(
-        FilterExpression=Attr('created_at').begins_with(year)
+        Attr('created_at').begins_with(year) & 
+        (Attr('deleted_at').not_exists() | Attr('deleted_at').eq('')) &
+        (Attr('deleted_by').not_exists() | Attr('deleted_by').eq(''))
     )
     data=result['Items']
     return jsonify(
@@ -264,7 +272,9 @@ def get_others():
     year = request.args['year']
     # user_id = request.args.get['user_id']
     result = others_table.scan(
-        FilterExpression=Attr('created_at').begins_with(year)
+        Attr('created_at').begins_with(year) & 
+        (Attr('deleted_at').not_exists() | Attr('deleted_at').eq('')) &
+        (Attr('deleted_by').not_exists() | Attr('deleted_by').eq(''))
     )
     data=result['Items']
     return jsonify(
