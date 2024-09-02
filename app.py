@@ -167,7 +167,7 @@ def edit_expenditure():
     result = expenditure_table.put_item(
                 Item = data
             )
-    return jsonify({'message': 'Expenditure edited or deleted successfully'})
+    return jsonify({'message': f'Expenditure { 'deleted' if request.args['operation'] and request.args['operation'] == 'delete' else 'edited'} successfully'})
 
 ############################################################################
 #                                  Donations                               #
@@ -211,8 +211,7 @@ def edit_donation():
     result = donation_table.put_item(
                 Item = data
             )
-    return jsonify({'message': 'Donation edited or deleted successfully'})
-
+    return jsonify({'message': f'Expenditure { 'deleted' if request.args['operation'] and request.args['operation'] == 'delete' else 'edited'} successfully'})
 
 
 ############################################################################
@@ -259,8 +258,7 @@ def edit_offering():
     result = offerings_table.put_item(
                 Item = data
             )
-    return jsonify({'message': 'Offering edited or deleted successfully'})
-
+    return jsonify({'message': f'Expenditure { 'deleted' if request.args['operation'] and request.args['operation'] == 'delete' else 'edited'} successfully'})
 
 ############################################################################
 #                                  Others                                  #
@@ -304,7 +302,7 @@ def edit_others():
     result = others_table.put_item(
                 Item = data
             )
-    return jsonify({'message': 'Other item edited or deleted successfully'})
+    return jsonify({'message': f'Expenditure { 'deleted' if request.args['operation'] and request.args['operation'] == 'delete' else 'edited'} successfully'})
 
 # Error handler
 @app.errorhandler(404)
