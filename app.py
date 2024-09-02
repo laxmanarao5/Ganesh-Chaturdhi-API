@@ -226,12 +226,12 @@ def post_others():
     result = others_table.put_item(
                 Item = data
             )
-    return jsonify({'message': 'Expenditure added successfully'})
+    return jsonify({'message': 'Others added successfully'})
 
 # Error handler
 @app.errorhandler(404)
 def resource_not_found(e):
-    return make_response(jsonify(error='Not found!'), 404)
+    return make_response(jsonify(error=e), 404)
 
 
 # Main function
