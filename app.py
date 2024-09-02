@@ -1,5 +1,6 @@
 import os
 from flask import Flask, jsonify, make_response, request
+from flask_cors import CORS
 import boto3
 from dotenv import load_dotenv
 load_dotenv()
@@ -13,6 +14,9 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('JWT_SESSION_SECRET_KEY')
 app.config["JWT_SECRET_KEY"] = os.getenv('JWT_SECRET_KEY')
 app.config['JWT_TOKEN_LOCATION'] = ['headers']
+
+# Allow CORS for specific origins (localhost and CloudFront)
+CORS(app, resources={r"/*": {"origins": ["http://localhost:5173", "https://d1gjegky4cxucv.cloudfront.net"]}})
 
 # JWT Initialization
 jwt = JWTManager(app)
@@ -69,12 +73,8 @@ def login():
     user = result['Items'][0]
     if user and bcrypt.check_password_hash(user['password'], data['password']):
         access_token = create_access_token(identity=user['email'])
-        return jsonify({'message': 'Login Success', 'access_token': access_token})
-    return jsonify(
-        {
-            "message":"Login Failed"
-        }
-    )
+        return jsonify({'message': 'Login Successful', 'access_token': access_token})
+    return make_response(jsonify({"error": "Unauthorized access"}), 401)
 # Add user
 @app.route('/create_user', methods=['POST'])
 @jwt_required()
@@ -109,11 +109,7 @@ def change_password():
         Item=user
         )
         return jsonify({'message': 'Password change Success'})
-    return jsonify(
-        {
-            "message":"Invalid request"
-        }
-    )
+    return make_response(jsonify({"error": "Unauthorized access"}), 401)
 
 
 
