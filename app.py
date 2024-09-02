@@ -148,6 +148,17 @@ def post_expenditure():
                 Item = data
             )
     return jsonify({'message': 'Expenditure added successfully'})
+#Edit expenditure
+@app.route('/expenditure',methods=['PUT'])
+@jwt_required()
+def edit_expenditure():
+    data = request.get_json()
+    data['updated_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    data['updated_by'] = get_jwt_identity()['email']
+    result = expenditure_table.put_item(
+                Item = data
+            )
+    return jsonify({'message': 'Expenditure edited successfully'})
 #Delete expenditure
 @app.route('/expenditure',methods=['DELETE'])
 @jwt_required()
