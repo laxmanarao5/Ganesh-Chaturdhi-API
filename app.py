@@ -130,7 +130,11 @@ def get_expenditure():
     year = request.args['year']
     # user_id = request.args.get['user_id']
     result = expenditure_table.scan(
-        FilterExpression=Attr('created_at').begins_with(year)
+       FilterExpression=(
+        Attr('created_at').begins_with(year) & 
+        (Attr('deleted_at').not_exists() | Attr('deleted_at').eq('')) &
+        (Attr('deleted_by').not_exists() | Attr('deleted_by').eq(''))
+    )
     )
     data=result['Items']
     return jsonify(
@@ -163,7 +167,7 @@ def edit_expenditure():
     result = expenditure_table.put_item(
                 Item = data
             )
-    return jsonify({'message': 'Expenditure edited or deleted successfully'})
+    return jsonify({'message': f'Expenditure { 'deleted' if request.args['operation'] and request.args['operation'] == 'delete' else 'edited'} successfully'})
 
 ############################################################################
 #                                  Donations                               #
@@ -176,7 +180,9 @@ def get_donations():
     year = request.args['year']
     # user_id = request.args.get['user_id']
     result = donation_table.scan(
-        FilterExpression=Attr('created_at').begins_with(year)
+        Attr('created_at').begins_with(year) & 
+        (Attr('deleted_at').not_exists() | Attr('deleted_at').eq('')) &
+        (Attr('deleted_by').not_exists() | Attr('deleted_by').eq(''))
     )
     return jsonify(
         result['Items']
@@ -205,8 +211,7 @@ def edit_donation():
     result = donation_table.put_item(
                 Item = data
             )
-    return jsonify({'message': 'Donation edited or deleted successfully'})
-
+    return jsonify({'message': f'Expenditure { 'deleted' if request.args['operation'] and request.args['operation'] == 'delete' else 'edited'} successfully'})
 
 
 ############################################################################
@@ -220,7 +225,9 @@ def get_offerings():
     year = request.args['year']
     # user_id = request.args.get['user_id']
     result = offerings_table.scan(
-        FilterExpression=Attr('created_at').begins_with(year)
+        Attr('created_at').begins_with(year) & 
+        (Attr('deleted_at').not_exists() | Attr('deleted_at').eq('')) &
+        (Attr('deleted_by').not_exists() | Attr('deleted_by').eq(''))
     )
     data=result['Items']
     return jsonify(
@@ -251,8 +258,7 @@ def edit_offering():
     result = offerings_table.put_item(
                 Item = data
             )
-    return jsonify({'message': 'Offering edited or deleted successfully'})
-
+    return jsonify({'message': f'Expenditure { 'deleted' if request.args['operation'] and request.args['operation'] == 'delete' else 'edited'} successfully'})
 
 ############################################################################
 #                                  Others                                  #
@@ -264,7 +270,9 @@ def get_others():
     year = request.args['year']
     # user_id = request.args.get['user_id']
     result = others_table.scan(
-        FilterExpression=Attr('created_at').begins_with(year)
+        Attr('created_at').begins_with(year) & 
+        (Attr('deleted_at').not_exists() | Attr('deleted_at').eq('')) &
+        (Attr('deleted_by').not_exists() | Attr('deleted_by').eq(''))
     )
     data=result['Items']
     return jsonify(
@@ -294,7 +302,7 @@ def edit_others():
     result = others_table.put_item(
                 Item = data
             )
-    return jsonify({'message': 'Other item edited or deleted successfully'})
+    return jsonify({'message': f'Expenditure { 'deleted' if request.args['operation'] and request.args['operation'] == 'delete' else 'edited'} successfully'})
 
 # Error handler
 @app.errorhandler(404)
