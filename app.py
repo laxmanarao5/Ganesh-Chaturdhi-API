@@ -75,10 +75,12 @@ def login():
     )
     user = result['Items'][0]
     if user and bcrypt.check_password_hash(user['password'], data['password']):
-        access_token = create_access_token(identity=user['email'])
+        del user['password']
+        access_token = create_access_token(identity=user)
         del user['password']
         return jsonify({'message': 'Login Successful', 'access_token': access_token, 'user':user})
     return make_response(jsonify({"error": "Unauthorized access"}), 401)
+
 # Add user
 @app.route('/create_user', methods=['POST'])
 @jwt_required()
@@ -101,7 +103,7 @@ def create_user():
 @jwt_required()
 def change_password():
     data = request.get_json()
-    data['email'] = get_jwt_identity()
+    data['email'] = get_jwt_identity()['email']
     print(data)
     result = user_table.scan(
         FilterExpression=Attr('email').eq(data['email'])
@@ -140,10 +142,30 @@ def get_expenditure():
 @jwt_required()
 def post_expenditure():
     data = request.get_json()
+    data['created_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    data['created_by'] = get_jwt_identity()['email']
+    data['id'] = str(uuid.uuid4()).replace('-','')
     result = expenditure_table.put_item(
                 Item = data
             )
     return jsonify({'message': 'Expenditure added successfully'})
+#Delete expenditure
+@app.route('/expenditure',methods=['DELETE'])
+@jwt_required()
+def delete_expenditure():
+    id = request.args['id']
+    response = table.update_item(
+    Key={
+        'id': id
+    },
+    UpdateExpression="SET deletedAt = :deletedAt, deletedBy = :deletedBy",
+    ExpressionAttributeValues={
+        ':deleted_at': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        ':deleted_by': get_jwt_identity()['email']
+    },
+    ReturnValues="UPDATED_NEW"
+    return jsonify({'message': 'Expenditure added successfully'})
+)
 
 ############################################################################
 #                                  Donations                               #
