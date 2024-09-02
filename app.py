@@ -7,13 +7,14 @@ load_dotenv()
 from boto3.dynamodb.conditions import Attr
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, get_jwt
 from flask_bcrypt import Bcrypt
-from datetime import datetime
+from datetime import datetime, timedelta
 import uuid
 app = Flask(__name__)
 # JWT Configuration
 app.config['SECRET_KEY'] = os.getenv('JWT_SESSION_SECRET_KEY')
 app.config["JWT_SECRET_KEY"] = os.getenv('JWT_SECRET_KEY')
 app.config['JWT_TOKEN_LOCATION'] = ['headers']
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=7)
 
 # Allow CORS for specific origins (localhost and CloudFront)
 CORS(app, resources={r"/*": {"origins": ["http://localhost:5173", "https://d1gjegky4cxucv.cloudfront.net"]}})
@@ -28,6 +29,7 @@ USERS_TABLE = os.getenv('USERS_TABLE')
 EXPENDITURE_TABLE = os.getenv('EXPENDITURE_TABLE')
 DONATION_TABLE = os.getenv('DONATION_TABLE')
 OTHERS_TABLE = os.getenv('OTHERS_TABLE')
+OFFERINGS_TABLE = os.getenv('OFFERINGS_TABLE')
 
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID1')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY1')
@@ -39,7 +41,8 @@ dynamodb = boto3.resource('dynamodb',aws_access_key_id=AWS_ACCESS_KEY_ID,aws_sec
 user_table = dynamodb.Table(USERS_TABLE)
 expenditure_table = dynamodb.Table(EXPENDITURE_TABLE)
 donation_table =  dynamodb.Table(DONATION_TABLE)
-other_table = dynamodb.Table(OTHERS_TABLE)
+others_table = dynamodb.Table(OTHERS_TABLE)
+offerings_table = dynamodb.Table(OFFERINGS_TABLE)
 
 @app.route("/")
 def hello_from_root():
@@ -73,7 +76,8 @@ def login():
     user = result['Items'][0]
     if user and bcrypt.check_password_hash(user['password'], data['password']):
         access_token = create_access_token(identity=user['email'])
-        return jsonify({'message': 'Login Successful', 'access_token': access_token})
+        del user['password']
+        return jsonify({'message': 'Login Successful', 'access_token': access_token, 'user':user})
     return make_response(jsonify({"error": "Unauthorized access"}), 401)
 # Add user
 @app.route('/create_user', methods=['POST'])
@@ -173,11 +177,56 @@ def post_donations():
 #                                  Offerings                               #
 ############################################################################
 
+# Get offerings
+@app.route('/offerings',methods=['GET'])
+@jwt_required()
+def get_offerings():
+    year = request.args['year']
+    # user_id = request.args.get['user_id']
+    result = offerings_table.scan(
+        FilterExpression=Attr('created_at').begins_with(year)
+    )
+    data=result['Items']
+    return jsonify(
+        data
+    )
+
+# Add offerings
+@app.route('/offering',methods=['POST'])
+@jwt_required()
+def post_offerings():
+    data = request.get_json()
+    result = offerings_table.put_item(
+                Item = data
+            )
+    return jsonify({'message': 'Offering added successfully'})
 
 
 ############################################################################
 #                                  Others                                  #
 ############################################################################
+# Get Others
+@app.route('/others',methods=['GET'])
+@jwt_required()
+def get_others():
+    year = request.args['year']
+    # user_id = request.args.get['user_id']
+    result = others_table.scan(
+        FilterExpression=Attr('created_at').begins_with(year)
+    )
+    data=result['Items']
+    return jsonify(
+        data
+    )
+# Add others
+@app.route('/others',methods=['POST'])
+@jwt_required()
+def post_others():
+    data = request.get_json()
+    result = others_table.put_item(
+                Item = data
+            )
+    return jsonify({'message': 'Expenditure added successfully'})
 
 # Error handler
 @app.errorhandler(404)
