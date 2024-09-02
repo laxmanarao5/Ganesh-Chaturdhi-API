@@ -77,7 +77,6 @@ def login():
     if user and bcrypt.check_password_hash(user['password'], data['password']):
         del user['password']
         access_token = create_access_token(identity=user)
-        del user['password']
         return jsonify({'message': 'Login Successful', 'access_token': access_token, 'user':user})
     return make_response(jsonify({"error": "Unauthorized access"}), 401)
 
@@ -258,4 +257,4 @@ def resource_not_found(e):
 
 # Main function
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(port=5002,debug=True)
