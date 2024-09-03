@@ -171,6 +171,10 @@ def edit_expenditure():
             )
     return jsonify({'message': f'Expenditure { 'deleted' if request.args['operation'] and request.args['operation'] == 'delete' else 'edited'} successfully'})
 
+
+
+
+
 ############################################################################
 #                                  Donations                               #
 ############################################################################
@@ -271,6 +275,12 @@ def edit_offering():
             )
     return jsonify({'message': f'Expenditure { 'deleted' if request.args['operation'] and request.args['operation'] == 'delete' else 'edited'} successfully'})
 
+
+
+
+
+
+
 ############################################################################
 #                                  Others                                  #
 ############################################################################
@@ -294,7 +304,7 @@ def get_others():
 #Add Others
 @app.route('/others',methods=['POST'])
 @jwt_required()
-def post_donations():
+def post_others():
     data = request.get_json()
     data['created_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     data['created_by'] = get_jwt_identity()['email']
