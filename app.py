@@ -174,28 +174,14 @@ def edit_expenditure():
 ############################################################################
 #                                  Donations                               #
 ############################################################################
-
-# Get donations
-@app.route('/donations',methods=['GET'])
-@jwt_required()
-def get_donations():
-    year = request.args['year']
-    # user_id = request.args.get['user_id']
-    result = donation_table.scan(
-        FilterExpression=(
-        Attr('created_at').begins_with(year) & 
-        (Attr('deleted_at').not_exists() | Attr('deleted_at').eq('')) &
-        (Attr('deleted_by').not_exists() | Attr('deleted_by').eq(''))
-    )
-    )
-    return jsonify(
-        result['Items']
-    )
-# Add donations
+#Add donation
 @app.route('/donations',methods=['POST'])
 @jwt_required()
 def post_donations():
     data = request.get_json()
+    data['created_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    data['created_by'] = get_jwt_identity()['email']
+    data['id'] = str(uuid.uuid4()).replace('-','')
     result = donation_table.put_item(
                 Item = data
             )
