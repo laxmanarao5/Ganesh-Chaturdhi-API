@@ -102,6 +102,8 @@ def create_user():
     else:
         data['created_at'] = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
         data['created_by'] = get_jwt_identity()['email']
+        data['updated_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        data['updated_by'] = get_jwt_identity()['email']
         data['user_id'] = str(uuid.uuid4()).replace('-','')
         data['password'] = bcrypt.generate_password_hash (data['password']).decode('utf-8') 
     response = user_table.put_item(
@@ -155,33 +157,29 @@ def get_expenditure():
     return jsonify(
         data
     )
-# Add expenditure
-@app.route('/expenditure',methods=['POST'])
-@jwt_required()
-def post_expenditure():
-    data = request.get_json()
-    data['created_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    data['created_by'] = get_jwt_identity()['email']
-    data['id'] = str(uuid.uuid4()).replace('-','')
-    result = expenditure_table.put_item(
-                Item = data
-            )
-    return jsonify({'message': 'Expenditure added successfully'})
-# Edit and Delete expenditure
+
+# Add, Edit and Delete expenditure
 @app.route('/expenditure',methods=['PUT'])
 @jwt_required()
 def edit_expenditure():
     data = request.get_json()
-    if request.args['operation'] and request.args['operation'] == 'delete':
+    operation = request.args.get('operation')
+    if operation == 'delete':
         data['deleted_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         data['deleted_by'] = get_jwt_identity()['email']
-    else:
+    elif operation == 'edit':
         data['updated_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         data['updated_by'] = get_jwt_identity()['email']
+    else:
+        data['created_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        data['created_by'] = get_jwt_identity()['email']
+        data['updated_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        data['updated_by'] = get_jwt_identity()['email']
+        data['id'] = str(uuid.uuid4()).replace('-','')
     result = expenditure_table.put_item(
                 Item = data
             )
-    return jsonify({'message': f'Expenditure { 'deleted' if request.args['operation'] and request.args['operation'] == 'delete' else 'edited'} successfully'})
+    return jsonify({'message': f'Expenditure { 'edited' if operation == 'edit' else 'deleted' if operation == 'delete' else 'added'} successfully'})
 
 
 
@@ -207,34 +205,29 @@ def get_donations():
     return jsonify(
         data
     )
-#Add donation
-@app.route('/donations',methods=['POST'])
-@jwt_required()
-def post_donations():
-    data = request.get_json()
-    data['created_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    data['created_by'] = get_jwt_identity()['email']
-    data['id'] = str(uuid.uuid4()).replace('-','')
-    result = donation_table.put_item(
-                Item = data
-            )
-    return jsonify({'message': 'Donation added successfully'})
-# Edit and Delete donation
-@app.route('/donations',methods=['PUT'])
+
+# Add, Edit and Delete donation
+@app.route('/donations',methods=['POST','PUT'])
 @jwt_required()
 def edit_donation():
-    operation = request.args['operation']
+    operation = request.args.get('operation')
     data = request.get_json()
-    if request.args['operation'] and request.args['operation'] == 'delete':
+    if operation == 'delete':
         data['deleted_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         data['deleted_by'] = get_jwt_identity()['email']
-    else:
+    elif operation == 'edit':
         data['updated_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         data['updated_by'] = get_jwt_identity()['email']
+    else:
+        data['created_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        data['created_by'] = get_jwt_identity()['email']
+        data['updated_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        data['updated_by'] = get_jwt_identity()['email']
+        data['id'] = str(uuid.uuid4()).replace('-','')
     result = donation_table.put_item(
                 Item = data
             )
-    return jsonify({'message': f'Expenditure { 'deleted' if request.args['operation'] and request.args['operation'] == 'delete' else 'edited'} successfully'})
+    return jsonify({'message': f'Donation { 'edited' if operation == 'edit' else 'deleted' if operation == 'delete' else 'added'} successfully'})
 
 
 ############################################################################
@@ -258,36 +251,29 @@ def get_offerings():
     return jsonify(
         data
     )
-# Add offerings
-@app.route('/offerings',methods=['POST'])
-@jwt_required()
-def post_offerings():
-    data = request.get_json()
-    data['created_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    data['created_by'] = get_jwt_identity()['email']
-    data['id'] = str(uuid.uuid4()).replace('-','')
-    result = offerings_table.put_item(
-                Item = data
-            )
-    return jsonify({'message': 'Offerings added successfully'})
-# Edit and Delete offering
-@app.route('/offering',methods=['PUT'])
+
+# Add, Edit and Delete offering
+@app.route('/offering',methods=['PUT','POST'])
 @jwt_required()
 def edit_offering():
-    operation = request.args['operation']
+    operation = request.args.get('operation')
     data = request.get_json()
-    if request.args['operation'] and request.args['operation'] == 'delete':
+    if operation == 'delete':
         data['deleted_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         data['deleted_by'] = get_jwt_identity()['email']
-    else:
+    elif operation == 'edit':
         data['updated_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         data['updated_by'] = get_jwt_identity()['email']
+    else:
+        data['created_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        data['created_by'] = get_jwt_identity()['email']
+        data['updated_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        data['updated_by'] = get_jwt_identity()['email']
+        data['id'] = str(uuid.uuid4()).replace('-','')
     result = offerings_table.put_item(
                 Item = data
             )
-    return jsonify({'message': f'Expenditure { 'deleted' if request.args['operation'] and request.args['operation'] == 'delete' else 'edited'} successfully'})
-
-
+    return jsonify({'message': f'Expenditure { 'edited' if operation == 'edit' else 'deleted' if operation == 'delete' else 'added'} successfully'})
 
 
 
@@ -313,33 +299,29 @@ def get_others():
     return jsonify(
         data
     )
-#Add Others
-@app.route('/others',methods=['POST'])
-@jwt_required()
-def post_others():
-    data = request.get_json()
-    data['created_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    data['created_by'] = get_jwt_identity()['email']
-    data['id'] = str(uuid.uuid4()).replace('-','')
-    result = others_table.put_item(
-                Item = data
-            )
-    return jsonify({'message': 'Donation added successfully'})
-# Edit and Delete others
-@app.route('/others',methods=['PUT'])
+
+# Add, Edit and Delete others
+@app.route('/others',methods=['PUT','POST'])
 @jwt_required()
 def edit_others():
     data = request.get_json()
-    if request.args['operation'] and request.args['operation'] == 'delete':
+    operation = request.args.get('operation')
+    if operation == 'delete':
         data['deleted_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         data['deleted_by'] = get_jwt_identity()['email']
-    else:
+    elif operation == 'edit':
         data['updated_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         data['updated_by'] = get_jwt_identity()['email']
+    else:
+        data['created_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        data['created_by'] = get_jwt_identity()['email']
+        data['updated_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        data['updated_by'] = get_jwt_identity()['email']
+        data['id'] = str(uuid.uuid4()).replace('-','')
     result = others_table.put_item(
                 Item = data
             )
-    return jsonify({'message': f'Expenditure { 'deleted' if request.args['operation'] and request.args['operation'] == 'delete' else 'edited'} successfully'})
+    return jsonify({'message': f'Others { 'edited' if operation == 'edit' else 'deleted' if operation == 'delete' else 'added'} successfully'})
 
 
 ############################################################################
