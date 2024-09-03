@@ -12,6 +12,7 @@ custom:
 provider:
   name: aws
   runtime: python3.12
+  stage: prod
 
 functions:
   api:
