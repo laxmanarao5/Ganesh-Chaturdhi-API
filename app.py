@@ -88,16 +88,21 @@ def login():
     return make_response(jsonify({"error": "Unauthorized access"}), 401)
 
 # Add user
-@app.route('/create_user', methods=['POST'])
+@app.route('/user', methods=['POST'])
 @jwt_required()
 def create_user():
-    data = request.get_json()
-    data['created_at'] = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
-    data['user_id'] = str(uuid.uuid4()).replace('-','')
-    data['password'] = bcrypt.generate_password_hash (data['password']).decode('utf-8') 
+    data = request.get_json() 
     if request.args['operation'] and request.args['operation']=='delete':
         data['deleted_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         data['deleted_by'] = get_jwt_identity()['email']
+    elif request.args['operation'] and request.args['operation']=='edit':
+        data['updated_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        data['updated_by'] = get_jwt_identity()['email']
+    else:
+        data['created_at'] = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+        data['created_by'] = get_jwt_identity()['email']
+        data['user_id'] = str(uuid.uuid4()).replace('-','')
+        data['password'] = bcrypt.generate_password_hash (data['password']).decode('utf-8') 
     response = user_table.put_item(
         Item=data
     )
