@@ -174,6 +174,23 @@ def edit_expenditure():
 ############################################################################
 #                                  Donations                               #
 ############################################################################
+# Get expenditures
+@app.route('/donations',methods=['GET'])
+@jwt_required()
+def get_donations():
+    year = request.args['year']
+    # user_id = request.args.get['user_id']
+    result = donation_table.scan(
+       FilterExpression=(
+        Attr('created_at').begins_with(year) & 
+        (Attr('deleted_at').not_exists() | Attr('deleted_at').eq('')) &
+        (Attr('deleted_by').not_exists() | Attr('deleted_by').eq(''))
+    )
+    )
+    data=result['Items']
+    return jsonify(
+        data
+    )
 #Add donation
 @app.route('/donations',methods=['POST'])
 @jwt_required()
@@ -225,16 +242,18 @@ def get_offerings():
     return jsonify(
         data
     )
-
 # Add offerings
-@app.route('/offering',methods=['POST'])
+@app.route('/offerings',methods=['POST'])
 @jwt_required()
 def post_offerings():
     data = request.get_json()
+    data['created_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    data['created_by'] = get_jwt_identity()['email']
+    data['id'] = str(uuid.uuid4()).replace('-','')
     result = offerings_table.put_item(
                 Item = data
             )
-    return jsonify({'message': 'Offering added successfully'})
+    return jsonify({'message': 'Offerings added successfully'})
 # Edit and Delete offering
 @app.route('/offering',methods=['PUT'])
 @jwt_required()
@@ -272,15 +291,18 @@ def get_others():
     return jsonify(
         data
     )
-# Add others
+#Add Others
 @app.route('/others',methods=['POST'])
 @jwt_required()
-def post_others():
+def post_donations():
     data = request.get_json()
+    data['created_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    data['created_by'] = get_jwt_identity()['email']
+    data['id'] = str(uuid.uuid4()).replace('-','')
     result = others_table.put_item(
                 Item = data
             )
-    return jsonify({'message': 'Others added successfully'})
+    return jsonify({'message': 'Donation added successfully'})
 # Edit and Delete others
 @app.route('/others',methods=['PUT'])
 @jwt_required()
