@@ -59,7 +59,12 @@ def hello_from_root():
 @app.route('/users', methods=['GET'])
 @jwt_required()
 def get_users():
-    result = user_table.scan()
+    result = user_table.scan(
+        FilterExpression=(
+        (Attr('deleted_at').not_exists() | Attr('deleted_at').eq('')) &
+        (Attr('deleted_by').not_exists() | Attr('deleted_by').eq(''))
+    )
+    )
     data = result['Items']
     # data = {message:"Working"}
     # return make_response(jsonify(error='Working fine 100'), 200)
@@ -90,7 +95,9 @@ def create_user():
     data['created_at'] = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
     data['user_id'] = str(uuid.uuid4()).replace('-','')
     data['password'] = bcrypt.generate_password_hash (data['password']).decode('utf-8') 
-
+    if request.args['operation'] and request.args['operation']=='delete':
+        data['deleted_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        data['deleted_by'] = get_jwt_identity()['email']
     response = user_table.put_item(
         Item=data
     )
@@ -158,7 +165,6 @@ def post_expenditure():
 @app.route('/expenditure',methods=['PUT'])
 @jwt_required()
 def edit_expenditure():
-    operation = request.args['operation']
     data = request.get_json()
     if request.args['operation'] and request.args['operation'] == 'delete':
         data['deleted_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
