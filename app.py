@@ -1,5 +1,5 @@
 import os
-from flask import Flask, jsonify, make_response, request
+from flask import Flask, jsonify, make_response, request, send_file
 from flask_cors import CORS
 import boto3
 from dotenv import load_dotenv
@@ -9,6 +9,8 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required, ge
 from flask_bcrypt import Bcrypt
 from datetime import datetime, timedelta
 import uuid
+import pandas as pd
+from io import BytesIO
 app = Flask(__name__)
 # JWT Configuration
 app.config['SECRET_KEY'] = os.getenv('JWT_SESSION_SECRET_KEY')
@@ -180,9 +182,11 @@ def get_donations():
     year = request.args['year']
     # user_id = request.args.get['user_id']
     result = donation_table.scan(
+        FilterExpression=(
         Attr('created_at').begins_with(year) & 
         (Attr('deleted_at').not_exists() | Attr('deleted_at').eq('')) &
         (Attr('deleted_by').not_exists() | Attr('deleted_by').eq(''))
+    )
     )
     return jsonify(
         result['Items']
@@ -225,9 +229,11 @@ def get_offerings():
     year = request.args['year']
     # user_id = request.args.get['user_id']
     result = offerings_table.scan(
+        FilterExpression=(
         Attr('created_at').begins_with(year) & 
         (Attr('deleted_at').not_exists() | Attr('deleted_at').eq('')) &
         (Attr('deleted_by').not_exists() | Attr('deleted_by').eq(''))
+    )
     )
     data=result['Items']
     return jsonify(
@@ -270,9 +276,11 @@ def get_others():
     year = request.args['year']
     # user_id = request.args.get['user_id']
     result = others_table.scan(
+       FilterExpression=(
         Attr('created_at').begins_with(year) & 
         (Attr('deleted_at').not_exists() | Attr('deleted_at').eq('')) &
         (Attr('deleted_by').not_exists() | Attr('deleted_by').eq(''))
+    )
     )
     data=result['Items']
     return jsonify(
@@ -291,7 +299,6 @@ def post_others():
 @app.route('/others',methods=['PUT'])
 @jwt_required()
 def edit_others():
-    operation = request.args['operation']
     data = request.get_json()
     if request.args['operation'] and request.args['operation'] == 'delete':
         data['deleted_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -303,6 +310,49 @@ def edit_others():
                 Item = data
             )
     return jsonify({'message': f'Expenditure { 'deleted' if request.args['operation'] and request.args['operation'] == 'delete' else 'edited'} successfully'})
+
+
+############################################################################
+#                                  Reports                                 #
+############################################################################
+# Edit and Delete others
+@app.route('/reports',methods=['GET'])
+def get_reports():
+    year = request.args['year']
+    excel_data = []
+    if request.args['type'] and request.args['type'] == 'expenditure':
+        res = expenditure_table.scan(
+           FilterExpression=(
+        Attr('created_at').begins_with(year) & 
+        (Attr('deleted_at').not_exists() | Attr('deleted_at').eq('')) &
+        (Attr('deleted_by').not_exists() | Attr('deleted_by').eq(''))
+        )
+        )
+
+    df = pd.DataFrame(res['Items'])
+
+    # Convert 'created_at' to datetime format and extract the date
+    df['created_at'] = pd.to_datetime(df['created_at'])
+    df['date'] = df['created_at'].dt.date  # Extract only the date
+
+    # Group the data by the date
+    grouped = df.groupby('date')
+
+    # Create an Excel file in memory
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        # Iterate through each date and create a new sheet
+        for date, group in grouped:
+            # Write the group (data for that date) to a new sheet
+            group.drop(columns=['date'], inplace=True)  # Remove the 'date' column
+            group.to_excel(writer, index=False, sheet_name=str(date))
+
+    # Seek to the beginning of the file
+    output.seek(0)
+
+    # Send the file as a response
+    return send_file(output, as_attachment=True, download_name='report_by_date.xlsx', mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+
 
 # Error handler
 @app.errorhandler(404)
