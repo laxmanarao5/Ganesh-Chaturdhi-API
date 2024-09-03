@@ -87,15 +87,16 @@ def login():
         return jsonify({'message': 'Login Successful', 'access_token': access_token, 'user':user})
     return make_response(jsonify({"error": "Unauthorized access"}), 401)
 
-# Add user
-@app.route('/user', methods=['POST'])
+# Add/Edit/Delete user
+@app.route('/user', methods=['POST','PUT'])
 @jwt_required()
 def create_user():
     data = request.get_json() 
-    if request.args['operation'] and request.args['operation']=='delete':
+    operation = request.args.get('operation')
+    if operation =='delete':
         data['deleted_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         data['deleted_by'] = get_jwt_identity()['email']
-    elif request.args['operation'] and request.args['operation']=='edit':
+    elif operation =='edit':
         data['updated_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         data['updated_by'] = get_jwt_identity()['email']
     else:
