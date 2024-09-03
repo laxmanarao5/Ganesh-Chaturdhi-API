@@ -159,7 +159,7 @@ def get_expenditure():
     )
 
 # Add, Edit and Delete expenditure
-@app.route('/expenditure',methods=['PUT'])
+@app.route('/expenditure',methods=['POST','PUT'])
 @jwt_required()
 def edit_expenditure():
     data = request.get_json()
