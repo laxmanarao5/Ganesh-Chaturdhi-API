@@ -27,3 +27,10 @@ functions:
 plugins:
   - serverless-wsgi
   - serverless-python-requirements
+
+package:
+  exclude:
+    - node_modules/**
+    - .git/** 
+    - .serverless/** 
+    - README.md
