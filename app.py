@@ -155,7 +155,7 @@ def get_expenditure():
     )
     data=result['Items']
     return jsonify(
-        data
+       { "message":"Expenditure details","data": data, "total": sum(int(item["amount"]) for item in data) }
     )
 
 # Add, Edit and Delete expenditure
@@ -203,7 +203,7 @@ def get_donations():
     )
     data=result['Items']
     return jsonify(
-        data
+        { "message":"Donation details","data": data, "total": sum(int(item["amount"]) for item in data) }
     )
 
 # Add, Edit and Delete donation
@@ -249,7 +249,7 @@ def get_offerings():
     )
     data=result['Items']
     return jsonify(
-        data
+        { "message":"Offerings details","data": data, "total": sum(int(item["amount"]) for item in data) }
     )
 
 # Add, Edit and Delete offering
@@ -297,7 +297,7 @@ def get_others():
     )
     data=result['Items']
     return jsonify(
-        data
+        { "message":"Others details","data": data, "total": sum(int(item["amount"]) for item in data) }
     )
 
 # Add, Edit and Delete others
