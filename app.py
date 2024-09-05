@@ -404,6 +404,7 @@ def get_reports():
 
 
 @app.route('/home',methods=['GET'])
+@jwt_required()
 def get_home():
     year = request.args.get('year')
     result = expenditure_table.scan(
