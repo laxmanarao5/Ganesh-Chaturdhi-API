@@ -402,6 +402,54 @@ def get_reports():
     return send_file(output, as_attachment=True, download_name='report_by_date.xlsx', mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
 
+
+@app.route('/home',methods=['GET'])
+def get_home():
+    year = request.args.get('year')
+    result = expenditure_table.scan(
+       FilterExpression=(
+        Attr('created_at').begins_with(year) & 
+        (Attr('deleted_at').not_exists() | Attr('deleted_at').eq('')) &
+        (Attr('deleted_by').not_exists() | Attr('deleted_by').eq(''))
+        )
+    )
+    data = result['Items']
+    pooja_expenditure = [item for item in data if item.get('category') == 'Pooja']
+    annadhanam_expenditure = [item for item in data if item.get('category') == 'Annadhanam']
+    entertainment_expenditure = [item for item in data if item.get('category') == 'Entertainment']
+    rent_expenditure = [item for item in data if item.get('category') == 'Rent']
+    donations =  donation_table.scan(
+       FilterExpression=(
+        Attr('created_at').begins_with(year) & 
+        (Attr('deleted_at').not_exists() | Attr('deleted_at').eq('')) &
+        (Attr('deleted_by').not_exists() | Attr('deleted_by').eq(''))
+        )
+    )
+    annadanam_donations = offerings_table.scan(
+       FilterExpression=(
+        Attr('created_at').begins_with(year) & 
+        (Attr('deleted_at').not_exists() | Attr('deleted_at').eq('')) &
+        (Attr('deleted_by').not_exists() | Attr('deleted_by').eq(''))
+        )
+    )
+    others = others_table.scan(
+       FilterExpression=(
+        Attr('created_at').begins_with(year) & 
+        (Attr('deleted_at').not_exists() | Attr('deleted_at').eq('')) &
+        (Attr('deleted_by').not_exists() | Attr('deleted_by').eq(''))
+        )
+    )
+    data = [
+        {"header":"Pooja Expenditure" ,"value": sum(int(item.get('amount', 0)) for item in pooja_expenditure)},
+        {"header":"Annadhanam Expenditure","value": sum(int(item.get('amount', 0)) for item in annadhanam_expenditure)},
+        {"header":"Entertainment Expenditure","value": sum(int(item.get('amount', 0)) for item in entertainment_expenditure)},
+        {"header":"Rent Expenditure","value": sum(int(item.get('amount', 0)) for item in rent_expenditure)},
+        {"header":"Donations","value": sum(int(item.get('amount', 0)) for item in donations['Items'])},
+        {"header":"Annadhanam Donations","value": sum(int(item.get('amount', 0)) for item in annadanam_donations['Items'])},
+        {"header":"Other","value": sum(int(item.get('amount', 0)) for item in others['Items'])},
+    ]
+    return jsonify({'message': 'Home data fetched sucessfully', 'data' : data })
+
 # Error handler
 @app.errorhandler(404)
 def resource_not_found(e):
