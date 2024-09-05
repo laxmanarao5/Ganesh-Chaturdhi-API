@@ -144,14 +144,23 @@ def change_password():
 @app.route('/expenditure',methods=['GET'])
 @jwt_required()
 def get_expenditure():
-    year = request.args['year']
-    # user_id = request.args.get['user_id']
-    result = expenditure_table.scan(
-       FilterExpression=(
-        Attr('created_at').begins_with(year) & 
+    year = request.args.get('year')
+    category = request.args.get('category')
+    user = request.args.get('user')
+    # Start with the base filter expression for year and deleted flags
+    filter_expression = (
+        Attr('created_at').begins_with(year) &
         (Attr('deleted_at').not_exists() | Attr('deleted_at').eq('')) &
         (Attr('deleted_by').not_exists() | Attr('deleted_by').eq(''))
     )
+    # Conditionally add the filter
+    if category:
+        filter_expression &= Attr('category').eq(category)
+    if user:
+        filter_expression &= Attr('created_by').eq(user)
+    # Query Db
+    result = expenditure_table.scan(
+       FilterExpression=filter_expression
     )
     data=result['Items']
     return jsonify(
@@ -192,14 +201,23 @@ def edit_expenditure():
 @app.route('/donations',methods=['GET'])
 @jwt_required()
 def get_donations():
-    year = request.args['year']
-    # user_id = request.args.get['user_id']
-    result = donation_table.scan(
-       FilterExpression=(
-        Attr('created_at').begins_with(year) & 
+    year = request.args.get('year')
+    category = request.args.get('category')
+    user = request.args.get('user')
+    # Start with the base filter expression for year and deleted flags
+    filter_expression = (
+        Attr('created_at').begins_with(year) &
         (Attr('deleted_at').not_exists() | Attr('deleted_at').eq('')) &
         (Attr('deleted_by').not_exists() | Attr('deleted_by').eq(''))
     )
+    # Conditionally add the filter
+    if category:
+        filter_expression &= Attr('category').eq(category)
+    if user:
+        filter_expression &= Attr('created_by').eq(user)
+        # Query Db
+    result = donation_table.scan(
+       FilterExpression=filter_expression
     )
     data=result['Items']
     return jsonify(
@@ -238,14 +256,23 @@ def edit_donation():
 @app.route('/offerings',methods=['GET'])
 @jwt_required()
 def get_offerings():
-    year = request.args['year']
-    # user_id = request.args.get['user_id']
-    result = offerings_table.scan(
-        FilterExpression=(
-        Attr('created_at').begins_with(year) & 
+    year = request.args.get('year')
+    category = request.args.get('category')
+    user = request.args.get('user')
+    # Start with the base filter expression for year and deleted flags
+    filter_expression = (
+        Attr('created_at').begins_with(year) &
         (Attr('deleted_at').not_exists() | Attr('deleted_at').eq('')) &
         (Attr('deleted_by').not_exists() | Attr('deleted_by').eq(''))
     )
+    # Conditionally add the filter
+    if category:
+        filter_expression &= Attr('category').eq(category)
+    if user:
+        filter_expression &= Attr('created_by').eq(user)
+        # Query Db
+    result = offerings_table.scan(
+        FilterExpression=filter_expression
     )
     data=result['Items']
     return jsonify(
@@ -286,14 +313,23 @@ def edit_offering():
 @app.route('/others',methods=['GET'])
 @jwt_required()
 def get_others():
-    year = request.args['year']
-    # user_id = request.args.get['user_id']
-    result = others_table.scan(
-       FilterExpression=(
-        Attr('created_at').begins_with(year) & 
+    year = request.args.get('year')
+    category = request.args.get('category')
+    user = request.args.get('user')
+    # Start with the base filter expression for year and deleted flags
+    filter_expression = (
+        Attr('created_at').begins_with(year) &
         (Attr('deleted_at').not_exists() | Attr('deleted_at').eq('')) &
         (Attr('deleted_by').not_exists() | Attr('deleted_by').eq(''))
     )
+    # Conditionally add the filter
+    if category:
+        filter_expression &= Attr('category').eq(category)
+    if user:
+        filter_expression &= Attr('created_by').eq(user)
+        # Query Db
+    result = others_table.scan(
+       FilterExpression=filter_expression
     )
     data=result['Items']
     return jsonify(
